@@ -59,21 +59,35 @@ def process_song_data(spark: SparkSession, input_data: str, output_data: str) ->
      .parquet(os.path.join(output_data, "artists")))
 
 
-def process_log_data(spark, input_data, output_data):
+def process_log_data(spark: SparkSession, input_data: str, output_data: str) -> None:
+    """Creates users and time dimension tables from log-data directory, and
+    also creates the songplays fact table from all available dimension tables.
+    All tables are saved in parquet files.
+
+    Args:
+        spark: a session to interact with spark
+        input_data: filepath to read data from
+        output_data: filepath to output the data
+    """
+
     # get filepath to log data file
-    log_data =
+    log_data = os.path.join(input_data, "log-data/*")
 
     # read log data file
-    df =
+    df = spark.read.json(log_data).dropDuplicates()
 
     # filter by actions for song plays
-    df =
+    df = df.filter(df.page == "NextSong")
 
     # extract columns for users table
-    artists_table =
+    users_table = df.select("userId", "firstName",
+                            "lastName", "gender", "level").dropDuplicates()
 
     # write users table to parquet files
-    artists_table
+    (users_table
+     .write
+     .mode("overwrite")
+     .parquet(os.path.join(output_data, "users")))
 
     # create timestamp column from original timestamp column
     get_timestamp = udf()
