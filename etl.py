@@ -42,21 +42,21 @@ def process_song_data(spark: SparkSession, input_data: str, output_data: str) ->
                             "year", "duration").dropDuplicates()
 
     # write songs table to parquet files partitioned by year and artist
-    songs_table = (songs_table
-                   .write
-                   .mode("overwrite")
-                   .partitionBy("year", "artist_id")
-                   .parquet(os.path.join(output_data, "songs")))
+    (songs_table
+     .write
+     .mode("overwrite")
+     .partitionBy("year", "artist_id")
+     .parquet(os.path.join(output_data, "songs")))
 
     # extract columns to create artists table
     artists_table = df.select("artist_id", "artist_name", "artist_location",
                               "artist_latitude", "artist_longitude").dropDuplicates()
 
     # write artists table to parquet files
-    artists_table = (artists_table
-                     .write
-                     .mode("overwrite")
-                     .parquet(os.path.join(output_data, "artists")))
+    (artists_table
+     .write
+     .mode("overwrite")
+     .parquet(os.path.join(output_data, "artists")))
 
 
 def process_log_data(spark, input_data, output_data):
