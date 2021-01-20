@@ -1,3 +1,12 @@
+"""ETLs JSON files in S3 using Spark to model Sparkify database.
+
+1) Extracts JSON files representing song and event data from S3.
+2) Transforms the data using Spark to create fact and dimension tables.
+fact: songplays
+dimensions: songs, artists, users, time
+3) Loads the tables into Parquet files and stores them back into S3.
+"""
+
 import configparser
 from datetime import datetime
 import os
@@ -15,7 +24,9 @@ os.environ['AWS_ACCESS_KEY_ID'] = config['AWS']['AWS_ACCESS_KEY_ID']
 os.environ['AWS_SECRET_ACCESS_KEY'] = config['AWS']['AWS_SECRET_ACCESS_KEY']
 
 
-def create_spark_session():
+def create_spark_session() -> None:
+    """Connects to spark cluster on AWS"""
+
     spark = SparkSession \
         .builder \
         .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.0") \
@@ -159,7 +170,7 @@ def process_log_data(spark: SparkSession, input_data: str, output_data: str) -> 
      .parquet(os.path.join(output_data, "songplays")))
 
 
-def main():
+def main() -> None:
     spark = create_spark_session()
     input_data = "s3a://udacity-dend/"
     output_data = ""
