@@ -51,8 +51,13 @@ def process_song_data(spark: SparkSession, input_data: str, output_data: str) ->
      .parquet(os.path.join(output_data, "songs")))
 
     # extract columns to create artists table
-    artists_table = df.select("artist_id", "artist_name", "artist_location",
-                              "artist_latitude", "artist_longitude").dropDuplicates()
+    artists_table = (df
+                     .select("artist_id",
+                             col("artist_name").alias("name"),
+                             col("artist_location").alias("location"),
+                             col("artist_latitude").alias("latitude"),
+                             col("artist_longitude").alias("longitude"))
+                     .dropDuplicates())
 
     # write artists table to parquet files
     (artists_table
@@ -82,8 +87,13 @@ def process_log_data(spark: SparkSession, input_data: str, output_data: str) -> 
     df = df.filter(df.page == "NextSong")
 
     # extract columns for users table
-    users_table = df.select("userId", "firstName",
-                            "lastName", "gender", "level").dropDuplicates()
+    users_table = (df
+                   .select(col("userId").alias("user_id"),
+                           col("firstName").alias("first_name"),
+                           col("lastName").alias("last_name"),
+                           "gender",
+                           "level")
+                   .dropDuplicates())
 
     # write users table to parquet files
     (users_table
@@ -127,13 +137,13 @@ def process_log_data(spark: SparkSession, input_data: str, output_data: str) -> 
                              (df.length == song_df.duration))
                        .join(time_table, df.start_time == time_table.start_time)
                        .select(df.start_time,
-                               df.userId,
+                               df.userId.alias("user_id"),
                                df.level,
-                               df.sessionId,
-                               df.location,
-                               df.userAgent,
                                song_df.song_id,
                                song_df.artist_id,
+                               df.sessionId.alias("session_id"),
+                               df.location,
+                               df.userAgent.alias("user_agent"),
                                time_table.year,
                                time_table.month)
                        .dropDuplicates())
