@@ -118,7 +118,7 @@ time                         users
 
 ## Running the Scripts
 
-###Initial Setup
+### Initial Setup
 
 These files are run within the AWS ecosystem, so familiarity with core services are assumed.
 
